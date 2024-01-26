@@ -67,6 +67,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     m_robotContainer.m_robotStates.autonomous = true;
+    m_robotContainer.m_gyrp.reset();
+    m_robotContainer.m_gyroSwerveDrive.resetOdometry(new Pose2d());
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {

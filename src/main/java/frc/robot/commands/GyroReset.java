@@ -11,12 +11,12 @@ import frc.robot.subsystems.GyroSwerveDrive;
 
 public class GyroReset extends Command {
   /** Creates a new GyroReset. */
-  ADIS16470_IMU m_gyro;
+  ADIS16470_IMU gyro;
   GyroSwerveDrive drivetrain;
 
   public GyroReset(ADIS16470_IMU gyro, GyroSwerveDrive drivetrain) {
     // Use addRequirements() here to declare subsystem dependencies.
-    m_gyro = gyro;
+    this.gyro = gyro;
     this.drivetrain = drivetrain;
   }
 
@@ -27,7 +27,8 @@ public class GyroReset extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    drivetrain.resetGyro();
+    gyro.reset();
+    drivetrain.resetOdometry(new Pose2d());
   }
 
   // Called once the command ends or is interrupted.

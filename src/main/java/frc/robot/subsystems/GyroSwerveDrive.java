@@ -94,7 +94,7 @@ public class GyroSwerveDrive extends SubsystemBase {
 
                     var alliance = DriverStation.getAlliance();
                     if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
+                        return alliance.get() != DriverStation.Alliance.Red;
                     }
                     return false;
                 },
@@ -102,13 +102,15 @@ public class GyroSwerveDrive extends SubsystemBase {
     );
   }
 
+  //help
+
   public ChassisSpeeds getSpeeds() {
     return kinematics.toChassisSpeeds(getModuleState());
   }
 
   @Override
   public void periodic() {
-    if(!trustVision) poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(1000, 1000, Units.degreesToRadians(20)));
+    poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(1000, 1000, Units.degreesToRadians(20)));
     poseEstimator.updateWithTime(
       Timer.getFPGATimestamp(),
        Rotation2d.fromDegrees(gyro.getAngle(gyro.getYawAxis())),
@@ -134,7 +136,7 @@ public class GyroSwerveDrive extends SubsystemBase {
       swerveMod[i].resetModule();
     }
     poseEstimator.resetPosition(
-      Rotation2d.fromDegrees(gyro.getAngle(gyro.getYawAxis()) % 360.0),
+      Rotation2d.fromDegrees(-gyro.getAngle(gyro.getYawAxis()) % 360.0),
        getModulePositions(),
         pose
     );
@@ -147,8 +149,8 @@ public class GyroSwerveDrive extends SubsystemBase {
 
   public void updateVisionPoseEstimator(Pose2d visionEstimate, double timestamp, double distance){
     //ramp measurement trust based on robot distance
-    poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.1 * Math.pow(15, distance), 0.1 * Math.pow(15, distance), Units.degreesToRadians(20)));
-    poseEstimator.addVisionMeasurement(visionEstimate, timestamp);
+    //poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.1 * Math.pow(15, distance), 0.1 * Math.pow(15, distance), Units.degreesToRadians(20)));
+    //poseEstimator.addVisionMeasurement(visionEstimate, timestamp);
     SmartDashboard.putNumber("Tag Distance ", distance);
     SmartDashboard.putNumber("Tag correlation ", 0.1 * Math.pow(15, distance));
   }
@@ -162,12 +164,12 @@ public class GyroSwerveDrive extends SubsystemBase {
   public void alteredGyroDrive(double dX, double dY, double dZ, double gyroAngle){
     dX = -applyDeadzone(dX, Constants.JOYSTICK_X_DEADZONE);
     dY = -applyDeadzone(dY, Constants.JOYSTICK_Y_DEADZONE);
-    dZ = -applyDeadzone(dZ, Constants.JOYSTICK_Z_DEADZONE) * 0.4;
+    dZ = -applyDeadzone(dZ, Constants.JOYSTICK_Z_DEADZONE) * 0.5;
     if ((dX != 0.0) || (dY != 0.0) || (dZ != 0.0)) {
       gyroDrive(
-         joystickSlewLimiterX.calculate(dX * m_RobotStates.driveMultiplier),
-         joystickSlewLimiterY.calculate(dY * m_RobotStates.driveMultiplier),
-         joystickSlewLimiterZ.calculate(dZ),
+         dX * m_RobotStates.driveMultiplier,
+         dY * m_RobotStates.driveMultiplier,
+         dZ,
           gyroAngle
       );
       m_RobotStates.inFrontOfCubeStation = false;
@@ -181,7 +183,7 @@ public class GyroSwerveDrive extends SubsystemBase {
   }
 
   public void gyroDrive(double str, double fwd, double rot, double gyroAngle) {
-    double angle = poseEstimator.getEstimatedPosition().getRotation().getRadians();
+    double angle = gyroAngle;//poseEstimator.getEstimatedPosition().getRotation().getRadians();
     double intermediary = fwd * Math.cos(angle) + str * Math.sin(angle);
     str = -fwd * Math.sin(angle) + str * Math.cos(angle);
     drive(str, intermediary, rot);
@@ -200,19 +202,21 @@ public class GyroSwerveDrive extends SubsystemBase {
   }
 
   public void driveUnits(ChassisSpeeds driveSpeeds) {
-    driveSpeeds = ChassisSpeeds.discretize(driveSpeeds, 0.2); 
+    //driveSpeeds = ChassisSpeeds.discretize(driveSpeeds, 0.2); 
     double str = driveSpeeds.vyMetersPerSecond;
     double fwd = driveSpeeds.vxMetersPerSecond;
     double rot = driveSpeeds.omegaRadiansPerSecond;
     double meterSecToRPM = (1 / Constants.DRIVE_POSITION_CONVERSION * 60.0);
-    drive(str * meterSecToRPM / Constants.MAX_DRIVETRAIN_SPEED, fwd * meterSecToRPM / Constants.MAX_DRIVETRAIN_SPEED, rot / 4.5);
+    System.out.println(fwd);
+    drive(str * meterSecToRPM / Constants.MAX_DRIVETRAIN_SPEED, fwd * meterSecToRPM / Constants.MAX_DRIVETRAIN_SPEED, rot);
   }
 
   public SwerveModuleState[] getModuleState(){
     SwerveModuleState[] positions = new SwerveModuleState[4];
-    for(int i = 0; i < 4; i++){
-      positions[i] = swerveMod[i].getState();
-    }
+    positions[0] = swerveMod[0].getState();
+    positions[1] = swerveMod[3].getState();
+    positions[2] = swerveMod[1].getState();
+    positions[3] = swerveMod[2].getState();
     return positions;
   }
 

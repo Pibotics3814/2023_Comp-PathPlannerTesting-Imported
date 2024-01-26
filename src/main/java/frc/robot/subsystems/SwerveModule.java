@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -45,11 +46,11 @@ public class SwerveModule {
 		driveEncoder = driveMotor.getEncoder();
 		
 		steerMotor = new CANSparkMax( Constants.SWERVE_STEER_MOTOR_IDS[swerveModIndex], MotorType.kBrushless );
-		steerMotor.setIdleMode(IdleMode.kBrake);
+		steerMotor.setIdleMode(IdleMode.kCoast);
 		steerMotor.setInverted( Constants.STEER_MOTOR_INVERTED[swerveModIndex] );
 		steerMotor.setSmartCurrentLimit(50, 40);
 
-		steerAngleEncoder = new CoreCANcoder( Constants.SWERVE_ENCODER_IDS[swerveModIndex] );
+		steerAngleEncoder = new CANcoder( Constants.SWERVE_ENCODER_IDS[swerveModIndex] );
 
 		steerAnglePIDController = new PIDController( 
 			Constants.SWERVE_STEER_PID_CONSTANTS[swerveModIndex][0],
@@ -72,7 +73,7 @@ public class SwerveModule {
 	}
 
 	public double getSteerAngle() {
-		return getOffsetSteerEncoderAngle(steerAngleEncoder.getAbsolutePosition().getValue());
+		return getOffsetSteerEncoderAngle(steerAngleEncoder.getAbsolutePosition().getValue() * 360.0);
 	}
 
 	public SwerveModuleState getState(){
@@ -95,10 +96,11 @@ public class SwerveModule {
 		double turnOutput = steerAnglePIDController.calculate( getSteerAngle(), angle );
 		steerMotor.set( MathUtil.clamp( turnOutput, -1.0, 1.0 ) );
 		driveVelocityPIDController.setReference(Constants.MAX_DRIVETRAIN_SPEED * MathUtil.clamp(speed, -1.0, 1.0), CANSparkMax.ControlType.kVelocity);
-		//SmartDashboard.putNumber("Module drive" + index, speed);
-		//SmartDashboard.putNumber("Module steer" + index, turnOutput);
-		if(Math.abs(speed) <= 0.001) driveMotor.set(0.0);
-		//*/SmartDashboard.putNumber("Angle Module " + index, steerAngleEncoder.getAbsolutePosition());
+		//driveMotor.set(speed);
+		SmartDashboard.putNumber("Module drive" + index, speed);
+		SmartDashboard.putNumber("Module steer" + index, turnOutput);
+		if(Math.abs(speed) <= 0.01) driveMotor.set(0.0);
+		SmartDashboard.putNumber("Angle Module " + index, getSteerAngle() * 180.0);
 	}
 
   public void initDefaultCommand() {

@@ -9,10 +9,10 @@ public final class Constants {
   //                 OI                 //
   ////////////////////////////////////////
 
-  public static final double JOYSTICK_X_DEADZONE = 0.2;
-  public static final double JOYSTICK_Y_DEADZONE = 0.2;
-  public static final double JOYSTICK_Z_DEADZONE = 0.25;
-  public static final double JOYSTICK_Z2_DEADZONE = 0.2;
+  public static final double JOYSTICK_X_DEADZONE = 0.15;
+  public static final double JOYSTICK_Y_DEADZONE = 0.15;
+  public static final double JOYSTICK_Z_DEADZONE = 0.15;
+  public static final double JOYSTICK_Z2_DEADZONE = 0.15;
   public static final double JOYSTICK_X_SLEW_RATE = 1.0;
   public static final double JOYSTICK_Y_SLEW_RATE = 1.0;
   public static final double JOYSTICK_Z_SLEW_RATE = 1.0;
@@ -52,10 +52,10 @@ public final class Constants {
 
   public static final double[] SWERVE_SETPOINT_OFFSET = {
     // must be between 0 & 360 degrees
-    360 - 273.51, // Front Right
-    360 - 81.47, // Rear Right
-    360 - 311.75, // Rear Left
-    360 - 238.45 // Front Left
+    88.7, // Front Right
+    96.5, // Rear Right
+    360.0 - 126.2, // Rear Left
+    360.0 - 58.0 // Front Left
   };
 
   public static final double[][] SWERVE_STEER_PID_CONSTANTS = {
@@ -74,14 +74,14 @@ public final class Constants {
 		{ 1.0e-4, 1.0e-6, 2.0e-4, 0.0, 1.0e-5, -1.0, 1.0 }  //Front Left
 	};
 
-  public static final double MAX_DRIVETRAIN_SPEED = 2500;
+  public static final double MAX_DRIVETRAIN_SPEED = 5000;
 
   public static final double[] TAG_ALIGN_STR_PID = {0.4, 0.0, 0.006};
   public static final double[] TAG_ALIGN_ROT_PID = {0.01, 5.0e-2, 0.002};
   public static final double[] TAG_ALIGN_FWD_PID = {0.4, 0.0, 0.006};
 
   public static final boolean[] STEER_MOTOR_INVERTED = {false, false, false, false};
-  public static final boolean[] DRIVE_MOTOR_INVERTED = {false, false, false, false};
+  public static final boolean[] DRIVE_MOTOR_INVERTED = {false, true, true, true};
 
   /*
    * Swerve constants for swerve module calculations
@@ -90,7 +90,7 @@ public final class Constants {
   public static final double SWERVE_FRAME_WIDTH = 27.5;
   public static final double SWERVE_RADIUS = Math.sqrt(Math.pow(SWERVE_FRAME_LENGTH, 2) + Math.pow(SWERVE_FRAME_WIDTH, 2));
   public static final double SWERVE_PID_TOLERANCE = 2.8e-4;
-  public static final double DRIVE_POSITION_CONVERSION = (3.8 * 0.0254 * Math.PI) / (6.75);
+  public static final double DRIVE_POSITION_CONVERSION = (4.0 * 0.0254 * Math.PI) / (6.75);
   //                                      (wheel circum / (encppr * swerve Ratio)
 
   ////////////////////////////////////////
